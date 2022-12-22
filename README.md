@@ -1,11 +1,15 @@
 # pdf-extractor
 
 ## Docker Setup
+To Start up a postgre db and django container 
 Quickly run the project using 
 ```bash
 docker-compose up -d --build
 ```
-This Starts up a postgre db and django container 
+This should be executed for migrations
+```bash
+docker-compose exec web python manage.py migrate
+```
 ## Create Virtual environment
 
 After cloning the repo you need to create a Virtual environment using the following command and install django for working with the examples.
