@@ -9,8 +9,12 @@ ENV PYTHONUNBUFFERED 1
 
 # install psycopg2 dependencies
 RUN apk update \
-    && apk add postgresql-dev gcc python3-dev musl-dev
-    
+    && apk add postgresql-dev gcc python3-dev musl-dev 
+
+# install tesseract dependencies
+RUN apk add tesseract-ocr 
+RUN apk --update add imagemagick
+
 # install dependencies
 RUN pip install --upgrade pip
 COPY ./requirements.txt .

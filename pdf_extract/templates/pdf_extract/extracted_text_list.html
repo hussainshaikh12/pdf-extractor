@@ -1,0 +1,28 @@
+{% extends "pdf_extract/layout.html" %}
+{% load static %}
+
+{% block body %}
+<table class="table">
+    <thead>
+        <tr>
+            <th scope="col">Text</th>
+            <th scope="col">Dcoument url</th>
+            <th scope="col">Uploaded At</th>
+            <th scope="col">View</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {% for extract in extracts %}
+        <tr class="table">
+            <td>{{extract.extract|truncatewords:10}}</td>
+            <td><strong> <a href="{{extract.document.document.url}}">{{extract.document.document.name}}</a> </strong></td>
+            <td> {{extract.document.uploaded_at}} </td>
+            <td> <a href="{% url 'extracted_text_detail' extract.id %}" class="btn btn-info"  >View</a> </td>
+        </tr>
+        {% endfor %}
+        
+    </tbody>
+</table>
+
+{% endblock%}

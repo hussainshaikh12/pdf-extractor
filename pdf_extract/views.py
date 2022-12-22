@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import get_object_or_404, redirect, render
 from .models import *
 from django.contrib.auth import authenticate, login, logout
 from django.db import IntegrityError
@@ -6,16 +6,57 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from .forms import DocumentForm
+from .models import *
+from PIL import Image
+from pytesseract import pytesseract
+import pypdfium2 as pdfium
+import os
 
 @login_required(login_url="login")
 def index(request):
-    pass
-   
-    # if request.user.is_authenticated:
-        
-        
-    return render(request, "pdf_extract/index.html")
+    if request.method == 'POST':
+        form = DocumentForm(request.POST, request.FILES)
+        if form.is_valid():
+            initial_obj = form.save(commit=False)
+            initial_obj.save()
+            #convert pdf to image
+            ext = os.path.splitext(initial_obj.document.path)[1]
+            # if pdf then convert to image
+            if ext == '.pdf':
+                pdf = pdfium.PdfDocument(initial_obj.document.path)
+                page = pdf.get_page(0)
+                pil_image = page.render_to(pdfium.BitmapConv.pil_image)
+            
+            else:
+                pil_image = Image.open(initial_obj.document.path)
+            
+            # for windows
+            if os.name == 'nt':
+                pytesseract.tesseract_cmd = "C:/Program Files/Tesseract-OCR/tesseract.exe" 
+            image_text = pytesseract.image_to_string(pil_image)
+            extraction = ExtractedText(user=request.user, extract=image_text, document=initial_obj)
+            extraction.save()
+            return redirect('extracted_text_detail', id=extraction.id)
+    else:
+        form = DocumentForm()
+    return render(request, 'pdf_extract/index.html', {
+        'form': form
+    })
 
+@login_required(login_url="login")
+def extracted_text_list(request):
+    extracts = ExtractedText.objects.all().filter(user=request.user).order_by('-document__uploaded_at')
+    return render(request, 'pdf_extract/extracted_text_list.html',{
+        'extracts':extracts
+    })
+
+@login_required(login_url="login")
+def extracted_text_detail(request, id):
+    extract = get_object_or_404(ExtractedText, pk=id)
+    return render(request, 'pdf_extract/extracted_text_detail.html',{
+        'extract':extract
+    })
 
 def login_view(request):
     if request.method == "POST":

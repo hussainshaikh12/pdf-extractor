@@ -8,7 +8,7 @@
         <title>{% block title %}Pdf Extract{% endblock %}</title>
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-        <link href="{% static 'pdf_extract/styles.css' %}" rel="stylesheet">
+        <link href="{% static 'pdf_extract/css/styles.css' %}" rel="stylesheet">
     </head>
 
     <nav class="navbar navbar-expand-lg navbar-dark bg-info fixed-top">
@@ -18,6 +18,14 @@
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div id="my-nav" class="collapse navbar-collapse">
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item {% if request.resolver_match.url_name == 'index' %}active{% endif %}">
+                        <a class="nav-link" href="{% url 'index' %}">Upload</a>
+                    </li>
+                    <li class="nav-item {% if request.resolver_match.url_name == 'extracted_text_list' %}active{% endif %}">
+                        <a class="nav-link" href="{% url 'extracted_text_list' %}">Extracted Texts</a>
+                    </li>
+                </ul>
                 <ul class="navbar-nav ml-auto">
                     {% if user.is_authenticated %}
                         <li class="nav-item">
