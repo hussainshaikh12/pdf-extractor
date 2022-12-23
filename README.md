@@ -1,6 +1,5 @@
 # pdf-extractor
-
-Feature Currently working locally as docker + postgre setup is haveing some conflict with pdf to image library setup
+Simple PDF extractor using opencv and tesseract 
 ## Docker Setup
 To Start up a postgre db and django container 
 Quickly run the project using 

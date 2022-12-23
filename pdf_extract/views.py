@@ -7,11 +7,11 @@ from django.urls import reverse
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from .forms import DocumentForm
-from .models import *
 from PIL import Image
 from pytesseract import pytesseract
 import pypdfium2 as pdfium
 import os
+from .utils import crop_image, text_extract
 
 @login_required(login_url="login")
 def index(request):
@@ -20,22 +20,10 @@ def index(request):
         if form.is_valid():
             initial_obj = form.save(commit=False)
             initial_obj.save()
-            #convert pdf to image
-            ext = os.path.splitext(initial_obj.document.path)[1]
-            # if pdf then convert to image
-            if ext == '.pdf':
-                pdf = pdfium.PdfDocument(initial_obj.document.path)
-                page = pdf.get_page(0)
-                pil_image = page.render_to(pdfium.BitmapConv.pil_image)
-            
-            else:
-                pil_image = Image.open(initial_obj.document.path)
-            
-            # for windows
-            if os.name == 'nt':
-                pytesseract.tesseract_cmd = "C:/Program Files/Tesseract-OCR/tesseract.exe" 
-            image_text = pytesseract.image_to_string(pil_image)
-            extraction = ExtractedText(user=request.user, extract=image_text, document=initial_obj)
+
+            text = text_extract(initial_obj.document.path)
+            extraction = ExtractedText(user=request.user,\
+                 extract=text, document=initial_obj)
             extraction.save()
             return redirect('extracted_text_detail', id=extraction.id)
     else:
@@ -108,3 +96,5 @@ def register(request):
         return HttpResponseRedirect(reverse("index"))
     else:
         return render(request, "pdf_extract/register.html")
+
+
