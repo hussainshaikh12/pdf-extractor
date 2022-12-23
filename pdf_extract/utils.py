@@ -15,6 +15,7 @@ def text_extract(path):
     else:
         img = cv2.imread(path)
     img = cv2.resize(img, None, fx=3, fy=3, interpolation=cv2.INTER_CUBIC)
+    # If os is windows
     if os.name == 'nt':
         pytesseract.tesseract_cmd = "C:/Program Files/Tesseract-OCR/tesseract.exe" 
     custom_config = r'--oem 3 --psm 4'
