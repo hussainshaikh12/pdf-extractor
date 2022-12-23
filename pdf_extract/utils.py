@@ -4,24 +4,19 @@ import os
 from pytesseract import pytesseract
 import pypdfium2 as pdfium
 
-def crop_image(filename, pixel_value=255):
-    gray = cv2.imread(filename, cv2.IMREAD_GRAYSCALE)
-    crop_rows = gray[~np.all(gray == pixel_value, axis=1), :]
-    cropped_image = crop_rows[:, ~np.all(crop_rows == pixel_value, axis=0)]
-    return cropped_image
-
 def text_extract(path):
     ext = os.path.splitext(path)[1]
     # if pdf then convert to image
     if ext == '.pdf':
         pdf = pdfium.PdfDocument(path)
         page = pdf.get_page(0)
-        pil_image = page.render_to(pdfium.BitmapConv.pil_image)
+        img = page.render_to(pdfium.BitmapConv.pil_image)
+        img = cv2.cvtColor(np.array(img), cv2.COLOR_RGB2BGR)
     else:
-        pil_image = crop_image(path)
+        img = cv2.imread(path)
+    img = cv2.resize(img, None, fx=3, fy=3, interpolation=cv2.INTER_CUBIC)
     if os.name == 'nt':
         pytesseract.tesseract_cmd = "C:/Program Files/Tesseract-OCR/tesseract.exe" 
-    custom_config = r'--oem 3 --psm 6'
-    text = pytesseract.image_to_string(pil_image, config=custom_config,lang='eng')
-
+    custom_config = r'--oem 3 --psm 4'
+    text = pytesseract.image_to_string(img, config=custom_config,lang='eng')
     return text
